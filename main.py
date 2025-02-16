@@ -19,7 +19,6 @@
 #   "nodejs",
 #   "npm",
 #   "pillow",
-#   "gitpython",
 #   "beautifulsoup4",
 #   "duckdb",
 #   "markdown2"
@@ -39,7 +38,6 @@ import importlib
 from pathlib import Path
 import sys
 import glob
-import git
 import base64
 from PIL import Image
 import io
@@ -486,13 +484,26 @@ Error encountered while running task
 def llm_code_executer(python_dependencies, python_code):
     ensure_data_directory()
 
-    inline_metadata_script = f"""
+#    inline_metadata_script = rf"""
 #/// script
 # requires-python = ">=3.11"
 # dependencies = [
-{''.join(f"# \"{dependency['module']}\",\n" for dependency in python_dependencies)}# ]   
+#{''.join(f"# \"{dependency['module']}\",\n" for dependency in python_dependencies)}# ]   
 #///
-"""
+#"""
+
+    inline_metadata_script = """
+#/// script
+# requires-python = ">=3.11"
+# dependencies = [
+{}
+#///  
+""".format(
+    ''.join('# "{module}",\n'.format(**dependency) for dependency in python_dependencies)
+)
+
+
+
     
     with open("/data/llm_code.py", "w") as f:
         f.write(inline_metadata_script)
