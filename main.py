@@ -21,7 +21,8 @@
 #   "pillow",
 #   "beautifulsoup4",
 #   "duckdb",
-#   "markdown2"
+#   "markdown2",
+#   "uv"
 # ]
 # ///
 import os
