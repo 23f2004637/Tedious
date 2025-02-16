@@ -6,3 +6,6 @@ uvicorn==0.34.0
 duckdb==1.2.0
 beautifulsoup4==4.13.3
 SQLAlchemy==2.0.36
+uv==0.5.23
+pandas==2.2.3
+

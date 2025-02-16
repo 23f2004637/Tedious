@@ -7,8 +7,11 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip first (optional but recommended)
+RUN pip install --no-cache-dir --upgrade pip
+
+# Install dependencies with system flag to avoid virtual environment issues
+RUN pip install --no-cache-dir -r requirements.txt --break-system-packages
 
 # Expose port 8000 for FastAPI
 EXPOSE 8000

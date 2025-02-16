@@ -14,7 +14,7 @@
 #   "httpx",
 #   "faker",
 #   "numpy",
-#   "markdown",
+#   "markdown2",
 #   "duckdb",
 #   "nodejs",
 #   "npm",
@@ -510,10 +510,25 @@ def llm_code_executer(python_dependencies, python_code):
         f.write(inline_metadata_script)
         f.write(python_code)
     
+#    try:
+#        for dep in python_dependencies:
+#            module_name = dep['module']
+#            
+#            # Check if the module is built-in or already installed
+#            if module_name in sys.builtin_module_names:
+#                logger.info(f"Skipping installation, '{module_name}' is a built-in module.")
+#            else:
+#                try:
+#                    importlib.import_module(module_name)
+#                    logger.info(f"Module '{module_name}' is already installed.")
+#                except ImportError:
+#                    logger.info(f"Installing '{module_name}'...")
+#                   #subprocess.check_call(["uv", "pip", "install", module_name])
+#                   subprocess.check_call(["pip", "install", module_name, "--break-system-packages"])
     try:
         for dep in python_dependencies:
             module_name = dep['module']
-            
+
             # Check if the module is built-in or already installed
             if module_name in sys.builtin_module_names:
                 logger.info(f"Skipping installation, '{module_name}' is a built-in module.")
@@ -523,7 +538,14 @@ def llm_code_executer(python_dependencies, python_code):
                     logger.info(f"Module '{module_name}' is already installed.")
                 except ImportError:
                     logger.info(f"Installing '{module_name}'...")
-                    subprocess.check_call(["uv", "pip", "install", module_name])
+
+                # Determine whether to install inside a venv or system-wide
+                    if sys.prefix != sys.base_prefix:  # Running inside a virtual environment
+                        subprocess.check_call([sys.executable, "-m", "pip", "install", module_name])
+                    else:  # Installing system-wide
+                        subprocess.check_call(["pip", "install", module_name, "--break-system-packages"])
+
+
         
         # Install Node.js dependencies if needed
         if any("npm:" in dep['module'] for dep in python_dependencies):
