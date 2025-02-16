@@ -42,6 +42,9 @@ import glob
 import base64
 from PIL import Image
 import io
+import re
+from A1 import execute_a1_task
+
 
 app = FastAPI()
 
@@ -552,7 +555,7 @@ def llm_code_executer(python_dependencies, python_code):
             subprocess.check_call(["npm", "install"], cwd="/data")
         
         # Execute the Python code
-        output = subprocess.run(["uv", "run", "/data/llm_code.py"], capture_output=True, text=True, cwd="/data")
+        output = subprocess.run(["uv", "run", "llm_code.py"], capture_output=True, text=True, cwd="/data")
         if output.returncode != 0:
             raise Exception(output.stderr)
         return "success"
@@ -608,6 +611,19 @@ async def task_runner(task: str = Query(..., description="Task description")):
         ],
         "response_format": response_format
     }
+    if "Run" in task and "datagen.py" in task and "@ds.study.iitm.ac.in" in task:
+        url_match = re.search(r'(https?://\S+)', task)
+        email_match = re.search(r'\b[A-Za-z0-9._%+-]+@ds\.study\.iitm\.ac\.in\b', task)
+        
+        if url_match and email_match:
+            url = url_match.group(1)
+            email = email_match.group(0)
+            
+            result = execute_a1_task(url, email)
+            if "completed successfully" in result:
+                return JSONResponse(content={"message": result}, status_code=200)
+            else:
+                return JSONResponse(content={"error": result}, status_code=500)
     try:
         response = requests.post(url=url, headers=headers, json=data)
         response.raise_for_status()
@@ -629,7 +645,7 @@ async def task_runner(task: str = Query(..., description="Task description")):
         if output == "success":
             return JSONResponse(content={"message": "Task completed successfully"}, status_code=200)
         elif isinstance(output, dict) and 'error' in output:
-            with open('/data/llm_code.py', 'r') as f:
+            with open('llm_code.py', 'r') as f:
                 code = f.read()
             response = resend_request(task, code, output['error'])
             r = response.json()
