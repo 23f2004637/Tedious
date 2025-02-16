@@ -509,7 +509,7 @@ def llm_code_executer(python_dependencies, python_code):
 
 
     
-    with open("llm_code.py", "w") as f:
+    with open("/data/llm_code.py", "w") as f:
         f.write(inline_metadata_script)
         f.write(python_code)
     
@@ -555,7 +555,7 @@ def llm_code_executer(python_dependencies, python_code):
             subprocess.check_call(["npm", "install"], cwd="/data")
         
         # Execute the Python code
-        output = subprocess.run(["uv", "run", "llm_code.py"], capture_output=True, text=True, cwd="/data")
+        output = subprocess.run(["uv", "run", "/data/llm_code.py"], capture_output=True, text=True, cwd="/data")
         if output.returncode != 0:
             raise Exception(output.stderr)
         return "success"
@@ -645,7 +645,7 @@ async def task_runner(task: str = Query(..., description="Task description")):
         if output == "success":
             return JSONResponse(content={"message": "Task completed successfully"}, status_code=200)
         elif isinstance(output, dict) and 'error' in output:
-            with open('llm_code.py', 'r') as f:
+            with open('/data/llm_code.py', 'r') as f:
                 code = f.read()
             response = resend_request(task, code, output['error'])
             r = response.json()
