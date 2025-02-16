@@ -506,7 +506,7 @@ def llm_code_executer(python_dependencies, python_code):
 
 
     
-    with open("/data/llm_code.py", "w") as f:
+    with open("llm_code.py", "w") as f:
         f.write(inline_metadata_script)
         f.write(python_code)
     
